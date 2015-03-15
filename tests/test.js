@@ -38,28 +38,16 @@
   ];
 
   describe('base32', function() {
-    describe('ascii', function() {
-      describe('encode', function() {
+    describe('encode', function() {
+      describe('ascii', function() {
         it('should be successful', function() {
           for(var i = 0;i < strs.length;++i) {
-            expect(base32.encode(strs[i])).to.be(base32Strs[i]);
-          }
-          expect(base32.encode(strs[0], true)).to.be(base32Strs[0]);
-        });
-      });
-
-      describe('decode', function() {
-        it('should be successful', function() {
-          for(var i = 0;i < strs.length;++i) {
-            expect(base32.decode(base32Strs[i])).to.be(strs[i]);
-            expect(base32.decode(base32Strs[i], true)).to.be(strs[i]);
+            expect(base32.encode(strs[i], true)).to.be(base32Strs[i]);
           }
         });
       });
-    });
 
-    describe('UTF8', function() {
-      describe('encode', function() {
+      describe('UTF8', function() {
         it('should be successful', function() {
           for(var i = 0;i < utf8Str.length;++i) {
             expect(base32.encode(utf8Str[i])).to.be(base32Utf8Strs[i]);
@@ -67,7 +55,42 @@
         });
       });
 
-      describe('decode', function() {
+      describe('Array', function() {
+        describe('Array', function() {
+          it('should be successful', function() {
+            expect(base32.encode([72])).to.be('JA======');
+            expect(base32.encode([72, 101])).to.be('JBSQ====');
+            expect(base32.encode([72, 101, 108])).to.be('JBSWY===');
+            expect(base32.encode([72, 101, 108, 108])).to.be('JBSWY3A=');
+            expect(base32.encode([72, 101, 108, 108, 111])).to.be('JBSWY3DP');
+          });
+        });
+
+        describe('Uint8Array', function() {
+          it('should be successful', function() {
+            expect(base32.encode(new Uint8Array([72, 101, 108, 108, 111]))).to.be('JBSWY3DP');
+          });
+        });
+
+        describe('ArrayBuffer', function() {
+          it('should be successful', function() {
+            expect(base32.encode(new ArrayBuffer(1))).to.be('AA======');
+          });
+        });
+      });
+    });
+
+    describe('decode', function() {
+      describe('ascii', function() {
+        it('should be successful', function() {
+          for(var i = 0;i < strs.length;++i) {
+            expect(base32.decode(base32Strs[i])).to.be(strs[i]);
+            expect(base32.decode(base32Strs[i], true)).to.be(strs[i]);
+          }
+        });
+      });
+
+      describe('UTF8', function() {
         it('should be successful', function() {
           for(var i = 0;i < utf8Str.length;++i) {
             expect(base32.decode(base32Utf8Strs[i])).to.be(utf8Str[i]);

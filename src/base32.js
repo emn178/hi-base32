@@ -1,5 +1,5 @@
 /*
- * hi-base32 v0.1.0
+ * hi-base32 v0.1.1
  * https://github.com/emn178/hi-base32
  *
  * Copyright 2015, emn178@gmail.com
@@ -23,28 +23,52 @@
     'Z': 25, '2': 26, '3': 27, '4': 28, '5': 29, '6': 30, '7': 31
   };
 
-  var encodeAsBytes = function(str) {
-    var bytes = [];
-    for (var i = 0;i < str.length; i++) {
-      var c = str.charCodeAt(i);
-      if (c < 0x80) {
-        bytes[bytes.length] = c;
-      } else if (c < 0x800) {
-        bytes[bytes.length] = 0xc0 | (c >> 6);
-        bytes[bytes.length] = 0x80 | (c & 0x3f);
-      } else if (c < 0xd800 || c >= 0xe000) {
-        bytes[bytes.length] = 0xe0 | (c >> 12);
-        bytes[bytes.length] = 0x80 | ((c >> 6) & 0x3f);
-        bytes[bytes.length] = 0x80 | (c & 0x3f);
+  var blocks = [0, 0, 0, 0, 0, 0, 0, 0];
+
+  var toUtf8String = function(bytes) {
+    var str = '', length = bytes.length, i = 0, followingChars = 0, b, c;
+    while(i < length) {
+      b = bytes[i++];
+      if(b <= 0x7F) {
+        str += String.fromCharCode(b);
+        continue;
+      } else if(b > 0xBF && b <= 0xDF) {
+        c = b & 0x1F;
+        followingChars = 1;
+      } else if(b <= 0xEF) {
+        c = b & 0x0F;
+        followingChars = 2;
+      } else if(b <= 0xF7) {
+        c = b & 0x07;
+        followingChars = 3;
       } else {
-        c = 0x10000 + (((c & 0x3ff) << 10) | (str.charCodeAt(++i) & 0x3ff));
-        bytes[bytes.length] = 0xf0 | (c >> 18);
-        bytes[bytes.length] = 0x80 | ((c >> 12) & 0x3f);
-        bytes[bytes.length] = 0x80 | ((c >> 6) & 0x3f);
-        bytes[bytes.length] = 0x80 | (c & 0x3f);
+        throw 'not a UTF-8 string';
+      }
+
+      for(var j = 0;j < followingChars;++j) {
+        b = bytes[i++];
+        if (b < 0x80 || b > 0xBF) {
+          throw 'not a UTF-8 string';
+        }
+        c <<= 6;
+        c += b & 0x3F;
+      }
+      if (c >= 0xD800 && c <= 0xDFFF) {
+        throw 'not a UTF-8 string';
+      }
+      if (c > 0x10FFFF) {
+        throw 'not a UTF-8 string';
+      }
+
+      if (c <= 0xFFFF) {
+        str += String.fromCharCode(c);
+      } else {
+        c -= 0x10000;
+        str += String.fromCharCode((c >> 10) + 0xD800);
+        str += String.fromCharCode((c & 0x3FF) + 0xDC00);
       }
     }
-    return bytes;
+    return str;
   };
 
   var decodeAsBytes = function(base32Str) {
@@ -106,7 +130,7 @@
     return bytes;
   };
 
-  var base32Encode = function(str) {
+  var encodeAscii = function(str) {
     var v1, v2, v3, v4, v5, base32Str = '', length = str.length;
     for(var i = 0, count = parseInt(length / 5) * 5;i < count;) {
       v1 = str.charCodeAt(i++);
@@ -166,8 +190,93 @@
     return base32Str;
   };
 
-  var utf8Base32Encode = function(str) {
-    var v1, v2, v3, v4, v5, base32Str = '', bytes = encodeAsBytes(str), length = bytes.length;
+  var encodeUtf8 = function(str) {
+    var v1, v2, v3, v4, v5, code, end = false, base32Str = '',
+        index = 0, i, start = 0, bytes = 0, length = str.length;
+    do {
+      blocks[0] = blocks[5];
+      blocks[1] = blocks[6];
+      blocks[2] = blocks[7];
+      for (i = start;index < length && i < 5; ++index) {
+        code = str.charCodeAt(index);
+        if (code < 0x80) {
+          blocks[i++] = code;
+        } else if (code < 0x800) {
+          blocks[i++] = 0xc0 | (code >> 6);
+          blocks[i++] = 0x80 | (code & 0x3f);
+        } else if (code < 0xd800 || code >= 0xe000) {
+          blocks[i++] = 0xe0 | (code >> 12);
+          blocks[i++] = 0x80 | ((code >> 6) & 0x3f);
+          blocks[i++] = 0x80 | (code & 0x3f);
+        } else {
+          code = 0x10000 + (((code & 0x3ff) << 10) | (str.charCodeAt(++index) & 0x3ff));
+          blocks[i++] = 0xf0 | (code >> 18);
+          blocks[i++] = 0x80 | ((code >> 12) & 0x3f);
+          blocks[i++] = 0x80 | ((code >> 6) & 0x3f);
+          blocks[i++] = 0x80 | (code & 0x3f);
+        }
+      }
+      bytes += i - start;
+      start = i - 5;
+      if(index == length) {
+        ++index;
+      }
+      if(index > length && i < 6) {
+        end = true;
+      }
+      v1 = blocks[0];
+      if(i > 4) {
+        v2 = blocks[1];
+        v3 = blocks[2];
+        v4 = blocks[3];
+        v5 = blocks[4];
+        base32Str += BASE32_ENCODE_CHAR[v1 >>> 3] +
+                     BASE32_ENCODE_CHAR[(v1 << 2 | v2 >>> 6) & 31] +
+                     BASE32_ENCODE_CHAR[(v2 >>> 1) & 31] +
+                     BASE32_ENCODE_CHAR[(v2 << 4 | v3 >>> 4) & 31] +
+                     BASE32_ENCODE_CHAR[(v3 << 1 | v4 >>> 7) & 31] +
+                     BASE32_ENCODE_CHAR[(v4 >>> 2) & 31] +
+                     BASE32_ENCODE_CHAR[(v4 << 3 | v5 >>> 5) & 31] +
+                     BASE32_ENCODE_CHAR[v5 & 31];
+      } else if(i == 1) {
+        base32Str += BASE32_ENCODE_CHAR[v1 >>> 3] +
+                     BASE32_ENCODE_CHAR[(v1 << 2) & 31] +
+                     '======';
+      } else if(i == 2) {
+        v2 = blocks[1];
+        base32Str += BASE32_ENCODE_CHAR[v1 >>> 3] +
+                     BASE32_ENCODE_CHAR[(v1 << 2 | v2 >>> 6) & 31] +
+                     BASE32_ENCODE_CHAR[(v2 >>> 1) & 31] +
+                     BASE32_ENCODE_CHAR[(v2 << 4) & 31] +
+                     '====';
+      } else if(i == 3) {
+        v2 = blocks[1];
+        v3 = blocks[2];
+        base32Str += BASE32_ENCODE_CHAR[v1 >>> 3] +
+                     BASE32_ENCODE_CHAR[(v1 << 2 | v2 >>> 6) & 31] +
+                     BASE32_ENCODE_CHAR[(v2 >>> 1) & 31] +
+                     BASE32_ENCODE_CHAR[(v2 << 4 | v3 >>> 4) & 31] +
+                     BASE32_ENCODE_CHAR[(v3 << 1) & 31] +
+                     '===';
+      } else if(i == 4) {
+        v2 = blocks[1];
+        v3 = blocks[2];
+        v4 = blocks[3];
+        base32Str += BASE32_ENCODE_CHAR[v1 >>> 3] +
+                     BASE32_ENCODE_CHAR[(v1 << 2 | v2 >>> 6) & 31] +
+                     BASE32_ENCODE_CHAR[(v2 >>> 1) & 31] +
+                     BASE32_ENCODE_CHAR[(v2 << 4 | v3 >>> 4) & 31] +
+                     BASE32_ENCODE_CHAR[(v3 << 1 | v4 >>> 7) & 31] +
+                     BASE32_ENCODE_CHAR[(v4 >>> 2) & 31] +
+                     BASE32_ENCODE_CHAR[(v4 << 3) & 31] +
+                     '=';
+      }
+    } while(!end);
+    return base32Str;
+  };
+
+  var encodeBytes = function(bytes) {
+    var v1, v2, v3, v4, v5, base32Str = '', length = bytes.length;
     for(var i = 0, count = parseInt(length / 5) * 5;i < count;) {
       v1 = bytes[i++];
       v2 = bytes[i++];
@@ -226,11 +335,30 @@
     return base32Str;
   };
 
-  var base32Decode = function(base32Str) {
-    base32Str = base32Str.replace(/=/g, '');
-    var v1, v2, v3, v4, v5, v6, v7, v8, str = '', length = base32Str.length;
+  var encode = function(input, asciiOnly) {
+    var notString = typeof(input) != 'string';
+    if(notString && input.constructor == ArrayBuffer) {
+      input = new Uint8Array(input);
+    }
+    if(notString) {
+      return encodeBytes(input);
+    } else if(asciiOnly) {
+      return encodeAscii(input);
+    } else {
+      return encodeUtf8(input);
+    }
+  };
 
-    // 4 char to 3 bytes
+  var decode = function(base32Str, asciiOnly) {
+    if(!asciiOnly) {
+      return toUtf8String(decodeAsBytes(base32Str));
+    }
+    var v1, v2, v3, v4, v5, v6, v7, v8, str = '', length = base32Str.indexOf('=');
+    if(length == -1) {
+      length = base32Str.length;
+    }
+
+    // 8 char to 5 bytes
     for(var i = 0, count = length >> 3 << 3;i < count;) {
       v1 = BASE32_DECODE_CHAR[base32Str.charAt(i++)];
       v2 = BASE32_DECODE_CHAR[base32Str.charAt(i++)];
@@ -285,71 +413,14 @@
     return str;
   };
 
-  var utf8Base32Decode = function(base32Str) {
-    var str = '', bytes = decodeAsBytes(base32Str), length = bytes.length;
-    var i = 0, followingChars = 0, b, c;
-    while(i < length) {
-      b = bytes[i++];
-      if(b <= 0x7F) {
-        str += String.fromCharCode(b);
-        continue;
-      } else if(b > 0xBF && b <= 0xDF) {
-        c = b & 0x1F;
-        followingChars = 1;
-      } else if(b <= 0xEF) {
-        c = b & 0x0F;
-        followingChars = 2;
-      } else if(b <= 0xF7) {
-        c = b & 0x07;
-        followingChars = 3;
-      } else {
-        throw 'not a UTF-8 string';
-      }
-
-      for(var j = 0;j < followingChars;++j) {
-        b = bytes[i++];
-        if (b < 0x80 || b > 0xBF) {
-          throw 'not a UTF-8 string';
-        }
-        c <<= 6;
-        c += b & 0x3F;
-      }
-      if (c >= 0xD800 && c <= 0xDFFF) {
-        throw 'not a UTF-8 string';
-      }
-      if (c > 0x10FFFF) {
-        throw 'not a UTF-8 string';
-      }
-
-      if (c <= 0xFFFF) {
-        str += String.fromCharCode(c);
-      } else {
-        c -= 0x10000;
-        str += String.fromCharCode((c >> 10) + 0xD800);
-        str += String.fromCharCode((c & 0x3FF) + 0xDC00);
-      }
-    }
-    return str;
-  };
-
-  var encode = function(str, asciiOnly) {
-    if(!asciiOnly && /[^\x00-\x7F]/.test(str)) {
-      return utf8Base32Encode(str);
-    } else {
-      return base32Encode(str);
-    }
-  };
-
-  var decode = function(base32Str, asciiOnly) {
-    return asciiOnly ? base32Decode(base32Str) : utf8Base32Decode(base32Str);
-  };
-
+  decode.asBytes = decodeAsBytes;
   var exports = {
     encode: encode,
-    decode: decode,
-    encodeAsBytes: encodeAsBytes,
-    decodeAsBytes: decodeAsBytes
+    decode: decode
   };
+  if(root.HI_BASE32_TEST) {
+    exports.toUtf8String = toUtf8String;
+  }
 
   if(!root.HI_BASE32_TEST && NODE_JS) {
     module.exports = exports;

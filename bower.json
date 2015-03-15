@@ -1,6 +1,6 @@
 {
   "name": "hi-base32",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "main": ["build/base32.min.js"],
   "ignore": [
     "samples",
