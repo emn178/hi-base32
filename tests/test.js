@@ -38,6 +38,14 @@
   ];
 
   describe('base32', function() {
+    
+    describe('window object', function() {
+      it('should work correctly', function() {
+        window = typeof window != 'undefined' ? window : global;
+        expect(base32.encode([72])).to.be('JA======');
+      });
+    });
+
     describe('encode', function() {
       describe('ascii', function() {
         it('should be successful', function() {
