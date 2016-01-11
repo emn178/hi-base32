@@ -11,10 +11,14 @@
   'use strict';
 
   var NODE_JS = typeof(global) != 'undefined';
+  
   if(NODE_JS) {
-    root = global;
-  } else {
-    root = window;
+    if (typeof(window) != 'undefined') {
+      root = window;
+    }
+    else {
+      root = global;
+    }
   }
 
   var BASE32_ENCODE_CHAR = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567'.split('');
