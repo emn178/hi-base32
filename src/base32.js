@@ -10,9 +10,11 @@
 ;(function(root, undefined) {
   'use strict';
 
-  var NODE_JS = typeof(module) != 'undefined';
+  var NODE_JS = typeof(global) != 'undefined';
   if(NODE_JS) {
     root = global;
+  } else {
+    root = window;
   }
 
   var BASE32_ENCODE_CHAR = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567'.split('');
