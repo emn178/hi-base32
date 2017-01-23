@@ -1,8 +1,16 @@
-# v0.1.1 / 2015-03-15
+# Change Log
 
-* Add decode.asBytes method.
-* Support byte Array, Uint8Array and ArrayBuffer input.
+## v0.2.0 / 2017-01-23
+### Added
+- AMD support.
+### Fixed
+- ArrayBuffer dosen't work in Webpack.
 
-# v0.1.0 / 2015-03-14
+## v0.1.1 / 2015-03-15
+### Added
+- decode.asBytes method.
+- support byte Array, Uint8Array and ArrayBuffer input.
 
-Create project
+## v0.1.0 / 2015-03-14
+### Added
+- create project.

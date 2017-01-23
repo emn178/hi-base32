@@ -1,28 +1,41 @@
+// Node.js env
 expect = require('expect.js');
 base32 = require('../src/base32.js');
 require('./test.js');
 
-delete require.cache[require.resolve('../src/base32.js')]
-delete require.cache[require.resolve('./test.js')]
+delete require.cache[require.resolve('../src/base32.js')];
+delete require.cache[require.resolve('./test.js')];
+base32 = null;
 
-global.HI_BASE32_TEST = true;
+// Webpack browser env
+HI_BASE32_NO_NODE_JS = true;
+window = global;
+base32 = require('../src/base32.js');
+require('./test.js');
+
+delete require.cache[require.resolve('../src/base32.js')];
+delete require.cache[require.resolve('./test.js')];
+base32 = null;
+
+// browser env
+HI_BASE32_NO_NODE_JS = true;
+HI_BASE32_NO_COMMON_JS = true;
+window = global;
 require('../src/base32.js');
 require('./test.js');
 
+delete require.cache[require.resolve('../src/base32.js')];
+delete require.cache[require.resolve('./test.js')];
+base32 = null;
 
-describe('toUtf8String', function() {
-  it('should throw exception', function() {
-    expect(function() {
-      base32.toUtf8String([0xF8]);
-    }).to.throwError();
-    expect(function() {
-      base32.toUtf8String([0xDF, 0x79]);
-    }).to.throwError();
-    expect(function() {
-      base32.toUtf8String([0xED, 0xA0, 0x80]);
-    }).to.throwError();
-    expect(function() {
-      base32.toUtf8String([0xF4, 0x90, 0x80, 0x80]);
-    }).to.throwError();
-  });
-});
+// browser AMD
+HI_BASE32_NO_NODE_JS = true;
+HI_BASE32_NO_COMMON_JS = true;
+window = global;
+define = function(func) {
+  base32 = func();
+  require('./test.js');
+};
+define.amd = true;
+
+require('../src/base32.js');

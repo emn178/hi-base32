@@ -37,6 +37,13 @@
     'IJQXGZJWGTTJRL7EXCAOPKFO4WP3VZUWXQ3DJZMARPSY7L7FRCL6LDNQ4WWZPZMFQPSL5BXIUGUOPJF24S5IZ2MAWLSYRNXIWOD6NFUZ46NIJ2FBVDT2JOXGS246NM4V'
   ];
 
+  var base32NonUtf8Strs = [
+    '7A======',
+    '354Q====',
+    '5WQIA===',
+    '6SIIBAA='
+  ];
+
   describe('base32', function() {
     describe('encode', function() {
       describe('ascii', function() {
@@ -97,6 +104,20 @@
           }
         });
       });
+
+      if (typeof HI_BASE32_NO_NODE_JS !== 'undefined') {
+        context('when non-UTF8 as UTF8', function () {
+          for (var i = 0; i < base32NonUtf8Strs.length; ++i) {
+            (function (i) {
+              it('should throw exception', function () {
+                expect(function () {
+                  base32.decode(base32NonUtf8Strs[i]);
+                }).to.throwError();
+              });
+            })(i);
+          }
+        });
+      }
     });
   });
 })(base32);
