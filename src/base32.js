@@ -1,7 +1,7 @@
 /*
  * [hi-base32]{@link https://github.com/emn178/hi-base32}
  *
- * @version 0.2.0
+ * @version 0.3.0
  * @author Chen, Yi-Cyuan [emn178@gmail.com]
  * @copyright Chen, Yi-Cyuan 2015-2017
  * @license MIT
@@ -149,7 +149,7 @@
         BASE32_ENCODE_CHAR[(v4 << 3 | v5 >>> 5) & 31] +
         BASE32_ENCODE_CHAR[v5 & 31];
     }
-    
+
     // remain char
     var remain = length - count;
     if (remain === 1) {
@@ -242,8 +242,8 @@
           BASE32_ENCODE_CHAR[v5 & 31];
       } else if (i === 1) {
         base32Str += BASE32_ENCODE_CHAR[v1 >>> 3] +
-                     BASE32_ENCODE_CHAR[(v1 << 2) & 31] +
-                     '======';
+          BASE32_ENCODE_CHAR[(v1 << 2) & 31] +
+          '======';
       } else if (i === 2) {
         v2 = blocks[1];
         base32Str += BASE32_ENCODE_CHAR[v1 >>> 3] +
@@ -294,7 +294,7 @@
         BASE32_ENCODE_CHAR[(v4 << 3 | v5 >>> 5) & 31] +
         BASE32_ENCODE_CHAR[v5 & 31];
     }
-    
+
     // remain char
     var remain = length - count;
     if (remain === 1) {
@@ -389,7 +389,7 @@
       v3 = BASE32_DECODE_CHAR[base32Str.charAt(i++)];
       v4 = BASE32_DECODE_CHAR[base32Str.charAt(i++)];
       str += String.fromCharCode((v1 << 3 | v2 >>> 2) & 255) +
-             String.fromCharCode((v2 << 6 | v3 << 1 | v4 >>> 4) & 255);
+        String.fromCharCode((v2 << 6 | v3 << 1 | v4 >>> 4) & 255);
     } else if (remain === 5) {
       v1 = BASE32_DECODE_CHAR[base32Str.charAt(i++)];
       v2 = BASE32_DECODE_CHAR[base32Str.charAt(i++)];
@@ -397,8 +397,8 @@
       v4 = BASE32_DECODE_CHAR[base32Str.charAt(i++)];
       v5 = BASE32_DECODE_CHAR[base32Str.charAt(i++)];
       str += String.fromCharCode((v1 << 3 | v2 >>> 2) & 255) +
-             String.fromCharCode((v2 << 6 | v3 << 1 | v4 >>> 4) & 255) +
-             String.fromCharCode((v4 << 4 | v5 >>> 1) & 255);
+        String.fromCharCode((v2 << 6 | v3 << 1 | v4 >>> 4) & 255) +
+        String.fromCharCode((v4 << 4 | v5 >>> 1) & 255);
     } else if (remain === 7) {
       v1 = BASE32_DECODE_CHAR[base32Str.charAt(i++)];
       v2 = BASE32_DECODE_CHAR[base32Str.charAt(i++)];
@@ -408,9 +408,9 @@
       v6 = BASE32_DECODE_CHAR[base32Str.charAt(i++)];
       v7 = BASE32_DECODE_CHAR[base32Str.charAt(i++)];
       str += String.fromCharCode((v1 << 3 | v2 >>> 2) & 255) +
-             String.fromCharCode((v2 << 6 | v3 << 1 | v4 >>> 4) & 255) +
-             String.fromCharCode((v4 << 4 | v5 >>> 1) & 255) +
-             String.fromCharCode((v5 << 7 | v6 << 2 | v7 >>> 3) & 255);
+        String.fromCharCode((v2 << 6 | v3 << 1 | v4 >>> 4) & 255) +
+        String.fromCharCode((v4 << 4 | v5 >>> 1) & 255) +
+        String.fromCharCode((v5 << 7 | v6 << 2 | v7 >>> 3) & 255);
     }
     return str;
   };
@@ -425,7 +425,7 @@
     module.exports = exports;
   } else {
     root.base32 = exports;
-    if(AMD) {
+    if (AMD) {
       define(function() {
         return exports;
       });

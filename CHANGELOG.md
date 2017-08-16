@@ -1,8 +1,13 @@
 # Change Log
 
+## v0.3.0 / 2017-08-16
+### Added
+- TypeScript support.
+
 ## v0.2.0 / 2017-01-23
 ### Added
 - AMD support.
+
 ### Fixed
 - ArrayBuffer dosen't work in Webpack.
 

@@ -37,6 +37,17 @@ require(['your/path/hi-baes32.js'], function (baes32) {
 // ...
 });
 ```
+
+## TypeScript
+```TypeScript
+import * as base32 from 'hi-base32';
+// or
+// import { encode, decode } from 'hi-base32';
+
+base32.encode('String to encode');
+base32.decode('Base32 string to decode');
+```
+
 ### Methods
 
 #### base32.encode(input, asciiOnly)
