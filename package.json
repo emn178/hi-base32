@@ -30,5 +30,6 @@
   "homepage": "https://github.com/emn178/hi-base32",
   "bugs": {
     "url": "https://github.com/emn178/hi-base32/issues"
-  }
+  },
+  "typings": "./hi-base32.d.ts"
 }
