@@ -23,5 +23,5 @@ interface Decode {
  * @param input The input you want to encode.
  * @param ascciOnly treat string as ASCII or UTF-8 string. Default is false.
  */
-export var encode(input: Input, asciiOnly?: boolean): string;
+export function encode(input: Input, asciiOnly?: boolean): string;
 export var decode: Decode;
