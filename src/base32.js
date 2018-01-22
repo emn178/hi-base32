@@ -260,7 +260,7 @@
           BASE32_ENCODE_CHAR[(v2 << 4 | v3 >>> 4) & 31] +
           BASE32_ENCODE_CHAR[(v3 << 1) & 31] +
           '===';
-      } else if (i === 4) {
+      } else {
         v2 = blocks[1];
         v3 = blocks[2];
         v4 = blocks[3];

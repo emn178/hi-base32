@@ -1,2 +1,8 @@
-my_test
-covreporter
+/node_modules/
+/coverage/
+/.nyc_output/
+/tests/
+.covignore
+.travis.yml
+.npmignore
+bower.json

@@ -1,5 +1,9 @@
 # Change Log
 
+## v0.4.0 / 2017-08-16
+### Fixed
+- TypeScript bug. #4
+
 ## v0.3.0 / 2017-08-16
 ### Added
 - TypeScript support.
