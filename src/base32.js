@@ -20,8 +20,8 @@
   var BASE32_ENCODE_CHAR = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567'.split('');
   var BASE32_DECODE_CHAR = {
     'A': 0, 'B': 1, 'C': 2, 'D': 3, 'E': 4, 'F': 5, 'G': 6, 'H': 7, 'I': 8,
-    'J': 9, 'K': 10, 'L': 11, 'M': 12, 'N': 13, 'O': 14, 'P': 15, 'Q': 16, 
-    'R': 17, 'S': 18, 'T': 19, 'U': 20, 'V': 21, 'W': 22, 'X': 23, 'Y': 24, 
+    'J': 9, 'K': 10, 'L': 11, 'M': 12, 'N': 13, 'O': 14, 'P': 15, 'Q': 16,
+    'R': 17, 'S': 18, 'T': 19, 'U': 20, 'V': 21, 'W': 22, 'X': 23, 'Y': 24,
     'Z': 25, '2': 26, '3': 27, '4': 28, '5': 29, '6': 30, '7': 31
   };
 
@@ -29,6 +29,14 @@
 
   var toUtf8String = function (bytes) {
     var str = '', length = bytes.length, i = 0, followingChars = 0, b, c;
+    var notUtf8 = function () {
+      var err = new Error('Decoded data is not valid UTF-8.'
+        + ' Maybe try .decode.asBytes()?'
+        + ' Partial data after reading ' + i + ' bytes: ' + str);
+      err.offset = i;
+      err.partial = str;
+      throw err;
+    };
     while (i < length) {
       b = bytes[i++];
       if (b <= 0x7F) {
@@ -44,22 +52,22 @@
         c = b & 0x07;
         followingChars = 3;
       } else {
-        throw 'not a UTF-8 string';
+        notUtf8();
       }
 
       for (var j = 0; j < followingChars; ++j) {
         b = bytes[i++];
         if (b < 0x80 || b > 0xBF) {
-          throw 'not a UTF-8 string';
+          notUtf8();
         }
         c <<= 6;
         c += b & 0x3F;
       }
       if (c >= 0xD800 && c <= 0xDFFF) {
-        throw 'not a UTF-8 string';
+        notUtf8();
       }
       if (c > 0x10FFFF) {
-        throw 'not a UTF-8 string';
+        notUtf8();
       }
 
       if (c <= 0xFFFF) {
