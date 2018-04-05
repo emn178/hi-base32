@@ -1,5 +1,10 @@
 # Change Log
 
+## v0.5.0 / 2018-04-05
+### Changed
+- Throw error object when invalid UTF8. #6
+- Throw error when invalid base32 characters. #8
+
 ## v0.4.0 / 2017-08-16
 ### Fixed
 - TypeScript bug. #4

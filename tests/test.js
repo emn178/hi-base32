@@ -44,6 +44,10 @@
     '6SIIBAA='
   ];
 
+  var base32Invalid8Strs = [
+    '1 ======'
+  ];
+
   describe('base32', function() {
     describe('encode', function() {
       describe('ascii', function() {
@@ -112,6 +116,23 @@
               it('should throw exception', function () {
                 expect(function () {
                   base32.decode(base32NonUtf8Strs[i]);
+                }).to.throwError();
+              });
+            })(i);
+          }
+        });
+
+        context('when invalid string', function () {
+          for (var i = 0; i < base32Invalid8Strs.length; ++i) {
+            (function (i) {
+              it('should throw exception', function () {
+                expect(function () {
+                  base32.decode(base32Invalid8Strs[i], true);
+                }).to.throwError();
+              });
+              it('should throw exception', function () {
+                expect(function () {
+                  base32.decode.asBytes(base32Invalid8Strs[i]);
                 }).to.throwError();
               });
             })(i);

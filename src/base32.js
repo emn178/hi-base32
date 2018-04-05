@@ -1,9 +1,9 @@
 /*
  * [hi-base32]{@link https://github.com/emn178/hi-base32}
  *
- * @version 0.3.0
+ * @version 0.5.0
  * @author Chen, Yi-Cyuan [emn178@gmail.com]
- * @copyright Chen, Yi-Cyuan 2015-2017
+ * @copyright Chen, Yi-Cyuan 2015-2018
  * @license MIT
  */
 /*jslint bitwise: true */
@@ -27,16 +27,19 @@
 
   var blocks = [0, 0, 0, 0, 0, 0, 0, 0];
 
+  var throwInvalidUtf8 = function (position, partial) {
+    if (partial.length > 10) {
+      partial = '...' + partial.substr(-10);
+    }
+    var err = new Error('Decoded data is not valid UTF-8.'
+      + ' Maybe try base32.decode.asBytes()?'
+      + ' Partial data after reading ' + position + ' bytes: ' + partial + ' <-');
+    err.position = position;
+    throw err;
+  };
+
   var toUtf8String = function (bytes) {
     var str = '', length = bytes.length, i = 0, followingChars = 0, b, c;
-    var notUtf8 = function () {
-      var err = new Error('Decoded data is not valid UTF-8.'
-        + ' Maybe try .decode.asBytes()?'
-        + ' Partial data after reading ' + i + ' bytes: ' + str);
-      err.offset = i;
-      err.partial = str;
-      throw err;
-    };
     while (i < length) {
       b = bytes[i++];
       if (b <= 0x7F) {
@@ -52,22 +55,22 @@
         c = b & 0x07;
         followingChars = 3;
       } else {
-        notUtf8();
+        throwInvalidUtf8(i, str);
       }
 
       for (var j = 0; j < followingChars; ++j) {
         b = bytes[i++];
         if (b < 0x80 || b > 0xBF) {
-          notUtf8();
+          throwInvalidUtf8(i, str);
         }
         c <<= 6;
         c += b & 0x3F;
       }
       if (c >= 0xD800 && c <= 0xDFFF) {
-        notUtf8();
+        throwInvalidUtf8(i, str);
       }
       if (c > 0x10FFFF) {
-        notUtf8();
+        throwInvalidUtf8(i, str);
       }
 
       if (c <= 0xFFFF) {
@@ -82,6 +85,9 @@
   };
 
   var decodeAsBytes = function (base32Str) {
+    if (!/^[A-Z2-7=]+$/.test(base32Str)) {
+      throw new Error('Invalid base32 characters');
+    }
     base32Str = base32Str.replace(/=/g, '');
     var v1, v2, v3, v4, v5, v6, v7, v8, bytes = [], index = 0, length = base32Str.length;
 
@@ -362,6 +368,9 @@
   var decode = function (base32Str, asciiOnly) {
     if (!asciiOnly) {
       return toUtf8String(decodeAsBytes(base32Str));
+    }
+    if (!/^[A-Z2-7=]+$/.test(base32Str)) {
+      throw new Error('Invalid base32 characters');
     }
     var v1, v2, v3, v4, v5, v6, v7, v8, str = '', length = base32Str.indexOf('=');
     if (length === -1) {
