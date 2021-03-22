@@ -1,9 +1,9 @@
 /*
  * [hi-base32]{@link https://github.com/emn178/hi-base32}
  *
- * @version 0.5.0
+ * @version 0.5.1
  * @author Chen, Yi-Cyuan [emn178@gmail.com]
- * @copyright Chen, Yi-Cyuan 2015-2018
+ * @copyright Chen, Yi-Cyuan 2015-2021
  * @license MIT
  */
 /*jslint bitwise: true */
