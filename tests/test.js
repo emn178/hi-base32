@@ -1,5 +1,6 @@
 (function(base32) {
   var strs = [
+    '',
     'H',
     'He',
     'Hel',
@@ -10,6 +11,7 @@
   ];
 
   var base32Strs = [
+    '',
     'JA======',
     'JBSQ====',
     'JBSWY===',
@@ -20,6 +22,7 @@
   ];
 
   var utf8Str = [
+    '',
     '中文',
     '中文1',
     '中文12',
@@ -29,6 +32,7 @@
   ];
 
   var base32Utf8Strs = [
+    '',
     '4S4K3ZUWQ4======',
     '4S4K3ZUWQ4YQ====',
     '4S4K3ZUWQ4YTE===',
@@ -41,7 +45,8 @@
     '7A======',
     '354Q====',
     '5WQIA===',
-    '6SIIBAA='
+    '6SIIBAA=',
+    '4S4K3ZUWQ7SLRLPGS2D6JOFN42LIPZFYVXTJNB7EXCW6NFUH4S4K3ZUWQ72JBAEA'
   ];
 
   var base32Invalid8Strs = [

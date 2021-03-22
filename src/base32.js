@@ -85,7 +85,9 @@
   };
 
   var decodeAsBytes = function (base32Str) {
-    if (!/^[A-Z2-7=]+$/.test(base32Str)) {
+    if (base32Str === '') {
+      return [];
+    } else if (!/^[A-Z2-7=]+$/.test(base32Str)) {
       throw new Error('Invalid base32 characters');
     }
     base32Str = base32Str.replace(/=/g, '');
@@ -209,6 +211,9 @@
   var encodeUtf8 = function (str) {
     var v1, v2, v3, v4, v5, code, end = false, base32Str = '',
       index = 0, i, start = 0, bytes = 0, length = str.length;
+      if (str === '') {
+        return base32Str;
+      }
     do {
       blocks[0] = blocks[5];
       blocks[1] = blocks[6];
@@ -369,7 +374,9 @@
     if (!asciiOnly) {
       return toUtf8String(decodeAsBytes(base32Str));
     }
-    if (!/^[A-Z2-7=]+$/.test(base32Str)) {
+    if (base32Str === '') {
+      return '';
+    } else if (!/^[A-Z2-7=]+$/.test(base32Str)) {
       throw new Error('Invalid base32 characters');
     }
     var v1, v2, v3, v4, v5, v6, v7, v8, str = '', length = base32Str.indexOf('=');

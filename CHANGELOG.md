@@ -1,5 +1,9 @@
 # Change Log
 
+## v0.5.1 / 2021-03-22
+### Fixed
+- encode/devoce empty string
+
 ## v0.5.0 / 2018-04-05
 ### Changed
 - Throw error object when invalid UTF8. #6
