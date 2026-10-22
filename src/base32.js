@@ -85,6 +85,7 @@
   };
 
   var decodeAsBytes = function (base32Str) {
+    base32Str = base32Str.trim().toUpperCase();
     if (base32Str === '') {
       return [];
     } else if (!/^[A-Z2-7=]+$/.test(base32Str)) {
