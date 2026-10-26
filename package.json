@@ -28,7 +28,9 @@
     "uglify-js": "^3.19.3"
   },
   "scripts": {
-    "test": "nyc mocha tests/node-test.js",
+    "test": "npm run build && npm run test:coverage",
+    "test:runtime": "mocha tests/node-test.js",
+    "test:coverage": "nyc --reporter=text --reporter=html --reporter=lcov mocha tests/node-test.js",
     "report": "nyc --reporter=html --reporter=text mocha tests/node-test.js",
     "coveralls": "nyc report --reporter=text-lcov | coveralls",
     "build": "rollup -c && uglifyjs src/base32.js -c -m --comments -o build/base32.min.js",

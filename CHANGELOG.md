@@ -4,9 +4,13 @@
 ### Added
 - `casefold` option to accept lowercase input when decoding. #20
 - support ESM #9
+- GitHub Actions CI across Node.js 20, 22, and 24 against the packed npm artifact
+- GitHub Actions publish workflow on release with npm trusted publishing and provenance
 - `prepack` script to build distributions before `npm pack` / `npm publish`
 
 ### Changed
+- Replace Travis CI with GitHub Actions
+- Update README badges to GitHub Actions, npm, and jsDelivr
 - Upgrade mocha, nyc and uglify-js to fix vulnerable dev dependencies
 
 ## v0.5.1 / 2021-03-22

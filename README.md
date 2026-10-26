@@ -1,8 +1,10 @@
 # hi-base32
-A simple Base32(RFC 4648) encode / decode function for JavaScript supports UTF-8 encoding.  
-[![Build Status](https://api.travis-ci.org/emn178/hi-base32.png)](https://travis-ci.org/emn178/hi-base32)
-[![Build Status](https://coveralls.io/repos/emn178/hi-base32/badge.png?branch=master)](https://coveralls.io/r/emn178/hi-base32?branch=master)  
-[![NPM](https://nodei.co/npm/hi-base32.png?downloads=true&downloadRank=true&stars=true)](https://www.npmjs.com/package/hi-base32)
+[![CI](https://github.com/emn178/hi-base32/actions/workflows/ci.yml/badge.svg)](https://github.com/emn178/hi-base32/actions/workflows/ci.yml)
+[![Coverage Status](https://coveralls.io/repos/emn178/hi-base32/badge.svg?branch=master)](https://coveralls.io/r/emn178/hi-base32?branch=master)
+[![NPM](https://img.shields.io/npm/v/hi-base32)](https://www.npmjs.com/package/hi-base32)
+[![CDNJS](https://img.shields.io/jsdelivr/npm/hm/hi-base32)](https://www.jsdelivr.com/package/npm/hi-base32)
+
+A simple Base32(RFC 4648) encode / decode function for JavaScript supports UTF-8 encoding.
 
 ## Demo
 [Base32 Encode Online](http://emn178.github.io/online-tools/base32_encode.html)  
