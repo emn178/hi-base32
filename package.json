@@ -3,18 +3,36 @@
   "version": "0.6.0",
   "description": "A simple Base32 encode / decode function for JavaScript supports UTF-8 encoding.",
   "main": "src/base32.js",
-  "types": "index.d.ts",
+  "module": "build/base32.mjs",
+  "exports": {
+    ".": {
+      "types": "./index.d.ts",
+      "import": "./build/base32.mjs",
+      "require": "./src/base32.js",
+      "default": "./src/base32.js"
+    },
+    "./src/base32.js": "./src/base32.js",
+    "./build/base32.min.js": "./build/base32.min.js",
+    "./build/base32.mjs": "./build/base32.mjs",
+    "./build/base32.min.mjs": "./build/base32.min.mjs",
+    "./package.json": "./package.json"
+  },
+  "types": "./index.d.ts",
   "devDependencies": {
+    "@rollup/plugin-commonjs": "^28.0.9",
+    "@rollup/plugin-terser": "^1.0.2",
     "expect.js": "~0.3.1",
-    "mocha": "~2.3.4",
-    "nyc": "^11.3.0",
-    "uglify-js": "^3.1.9"
+    "mocha": "^12.0.3",
+    "nyc": "^18.0.0",
+    "rollup": "^4.65.0",
+    "uglify-js": "^3.19.3"
   },
   "scripts": {
     "test": "nyc mocha tests/node-test.js",
     "report": "nyc --reporter=html --reporter=text mocha tests/node-test.js",
     "coveralls": "nyc report --reporter=text-lcov | coveralls",
-    "build": "uglifyjs src/base32.js -c -m --comments -o build/base32.min.js"
+    "build": "rollup -c && uglifyjs src/base32.js -c -m --comments -o build/base32.min.js",
+    "prepack": "npm run build"
   },
   "repository": {
     "type": "git",

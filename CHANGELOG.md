@@ -3,6 +3,11 @@
 ## v0.6.0 / 2026-10-26
 ### Added
 - `casefold` option to accept lowercase input when decoding. #20
+- support ESM #9
+- `prepack` script to build distributions before `npm pack` / `npm publish`
+
+### Changed
+- Upgrade mocha, nyc and uglify-js to fix vulnerable dev dependencies
 
 ## v0.5.1 / 2021-03-22
 ### Fixed
