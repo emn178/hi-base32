@@ -1,5 +1,9 @@
 # Change Log
 
+## v0.6.0 / 2026-10-26
+### Added
+- `casefold` option to accept lowercase input when decoding. #20
+
 ## v0.5.1 / 2021-03-22
 ### Fixed
 - encode/devoce empty string

@@ -1,9 +1,9 @@
 /*
  * [hi-base32]{@link https://github.com/emn178/hi-base32}
  *
- * @version 0.5.1
+ * @version 0.6.0
  * @author Chen, Yi-Cyuan [emn178@gmail.com]
- * @copyright Chen, Yi-Cyuan 2015-2021
+ * @copyright Chen, Yi-Cyuan 2015-2026
  * @license MIT
  */
 /*jslint bitwise: true */
@@ -84,12 +84,21 @@
     return str;
   };
 
-  var decodeAsBytes = function (base32Str) {
-    if (base32Str === '') {
-      return [];
-    } else if (!/^[A-Z2-7=]+$/.test(base32Str)) {
+  var validate = function (base32Str, casefold) {
+    // Validate before toUpperCase(): it maps some non-ASCII characters to ASCII
+    // letters (e.g. 'ı' -> 'I', 'ſ' -> 'S', 'ﬆ' -> 'ST'). Without the u flag,
+    // the i flag never matches non-ASCII characters against ASCII letters.
+    if (!(casefold ? /^[A-Z2-7=]+$/i : /^[A-Z2-7=]+$/).test(base32Str)) {
       throw new Error('Invalid base32 characters');
     }
+    return casefold ? base32Str.toUpperCase() : base32Str;
+  };
+
+  var decodeAsBytes = function (base32Str, casefold) {
+    if (base32Str === '') {
+      return [];
+    }
+    base32Str = validate(base32Str, casefold);
     base32Str = base32Str.replace(/=/g, '');
     var v1, v2, v3, v4, v5, v6, v7, v8, bytes = [], index = 0, length = base32Str.length;
 
@@ -370,15 +379,14 @@
     }
   };
 
-  var decode = function (base32Str, asciiOnly) {
+  var decode = function (base32Str, asciiOnly, casefold) {
     if (!asciiOnly) {
-      return toUtf8String(decodeAsBytes(base32Str));
+      return toUtf8String(decodeAsBytes(base32Str, casefold));
     }
     if (base32Str === '') {
       return '';
-    } else if (!/^[A-Z2-7=]+$/.test(base32Str)) {
-      throw new Error('Invalid base32 characters');
     }
+    base32Str = validate(base32Str, casefold);
     var v1, v2, v3, v4, v5, v6, v7, v8, str = '', length = base32Str.indexOf('=');
     if (length === -1) {
       length = base32Str.length;

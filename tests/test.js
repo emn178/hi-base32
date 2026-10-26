@@ -114,6 +114,44 @@
         });
       });
 
+      describe('casefold', function() {
+        it('should be successful', function() {
+          for(var i = 0;i < strs.length;++i) {
+            expect(base32.decode(base32Strs[i].toLowerCase(), false, true)).to.be(strs[i]);
+            expect(base32.decode(base32Strs[i].toLowerCase(), true, true)).to.be(strs[i]);
+          }
+          for(var i = 0;i < utf8Str.length;++i) {
+            expect(base32.decode(base32Utf8Strs[i].toLowerCase(), false, true)).to.be(utf8Str[i]);
+          }
+          expect(base32.decode.asBytes('jbswy3dp', true)).to.eql([72, 101, 108, 108, 111]);
+          expect(base32.decode.asBytes('JbSwY3dP', true)).to.eql([72, 101, 108, 108, 111]);
+        });
+
+        it('should throw exception without casefold', function() {
+          expect(function () {
+            base32.decode('jbswy3dp');
+          }).to.throwError();
+          expect(function () {
+            base32.decode('jbswy3dp', true);
+          }).to.throwError();
+          expect(function () {
+            base32.decode.asBytes('jbswy3dp');
+          }).to.throwError();
+        });
+
+        it('should not fold non-ASCII characters', function() {
+          expect(function () {
+            base32.decode.asBytes('\u0131', true);
+          }).to.throwError();
+          expect(function () {
+            base32.decode('\u017f', true, true);
+          }).to.throwError();
+          expect(function () {
+            base32.decode('\ufb06', false, true);
+          }).to.throwError();
+        });
+      });
+
       if (typeof HI_BASE32_NO_NODE_JS !== 'undefined') {
         context('when non-UTF8 as UTF8', function () {
           for (var i = 0; i < base32NonUtf8Strs.length; ++i) {

@@ -62,7 +62,7 @@ Input string or bytes to encode.
 
 Specify the string encoding is ASCII. It only works when string input.
 
-#### base32.decode(base32Str, asciiOnly)
+#### base32.decode(base32Str, asciiOnly, casefold)
 
 Decode base32 string, set asciiOnly to true for better performace.
 
@@ -74,13 +74,21 @@ Base32 string to decode.
 
 Specify the string encoding is ASCII.
 
-#### base32.decode.asBytes(base32Str)
+##### *casefold: `Boolean` (default: `false`)*
+
+Accept lowercase alphabet (`a-z`) as input. RFC 4648 only defines uppercase alphabet, so it is disabled by default.
+
+#### base32.decode.asBytes(base32Str, casefold)
 
 Decode base32 string and return byte `Array`
 
 ##### *base32Str: `String`*
 
 Base32 string to decode.
+
+##### *casefold: `Boolean` (default: `false`)*
+
+Accept lowercase alphabet (`a-z`) as input.
 
 ## Example
 ```JavaScript

@@ -6,15 +6,17 @@ interface Decode {
    *
    * @param base32Str The base32 string you want to decode.
    * @param ascciOnly decode as ASCII or decode as UTF-8 string. Default is false.
+   * @param casefold accept lowercase alphabet as input. Default is false.
    */
-  (base32Str: string, asciiOnly?: boolean): string;
+  (base32Str: string, asciiOnly?: boolean, casefold?: boolean): string;
 
   /**
    * Decode base32 string and return byte array
    *
    * @param base32Str The base32 string you want to decode.
+   * @param casefold accept lowercase alphabet as input. Default is false.
    */
-  asBytes(base32Str: string): number[];
+  asBytes(base32Str: string, casefold?: boolean): number[];
 }
 
 /**
