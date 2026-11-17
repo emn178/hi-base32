@@ -9,7 +9,7 @@ var base32$1 = {exports: {}};
 /*
  * [hi-base32]{@link https://github.com/emn178/hi-base32}
  *
- * @version 0.6.0
+ * @version 0.7.0
  * @author Chen, Yi-Cyuan [emn178@gmail.com]
  * @copyright Chen, Yi-Cyuan 2015-2026
  * @license MIT
@@ -19,10 +19,17 @@ var base32$1 = {exports: {}};
 	/*jslint bitwise: true */
 	(function () {
 
-	  var root = typeof window === 'object' ? window : {};
-	  var NODE_JS = !root.HI_BASE32_NO_NODE_JS && typeof process === 'object' && process.versions && process.versions.node;
+	  var WINDOW = typeof window === 'object';
+	  var root = WINDOW ? window : {};
+	  if (root.HI_BASE32_NO_WINDOW) {
+	    WINDOW = false;
+	  }
+	  var WEB_WORKER = !WINDOW && typeof self === 'object';
+	  var NODE_JS = !root.HI_BASE32_NO_NODE_JS && !WINDOW && typeof process === 'object' && process.versions && process.versions.node && process.type != 'renderer';
 	  if (NODE_JS) {
 	    root = commonjsGlobal;
+	  } else if (WEB_WORKER) {
+	    root = self;
 	  }
 	  var COMMON_JS = !root.HI_BASE32_NO_COMMON_JS && 'object' === 'object' && module.exports;
 	  var BASE32_ENCODE_CHAR = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567'.split('');
@@ -35,50 +42,56 @@ var base32$1 = {exports: {}};
 
 	  var blocks = [0, 0, 0, 0, 0, 0, 0, 0];
 
-	  var throwInvalidUtf8 = function (position, partial) {
-	    if (partial.length > 10) {
-	      partial = '...' + partial.substr(-10);
-	    }
-	    var err = new Error('Decoded data is not valid UTF-8.'
-	      + ' Maybe try base32.decode.asBytes()?'
-	      + ' Partial data after reading ' + position + ' bytes: ' + partial + ' <-');
-	    err.position = position;
-	    throw err;
-	  };
-
 	  var toUtf8String = function (bytes) {
-	    var str = '', length = bytes.length, i = 0, followingChars = 0, b, c;
+	    var str = '', length = bytes.length, i = 0, b, c, needed, lower, upper;
 	    while (i < length) {
 	      b = bytes[i++];
 	      if (b <= 0x7F) {
 	        str += String.fromCharCode(b);
 	        continue;
-	      } else if (b > 0xBF && b <= 0xDF) {
+	      }
+	      lower = 0x80;
+	      upper = 0xBF;
+	      if (b >= 0xC2 && b <= 0xDF) {
 	        c = b & 0x1F;
-	        followingChars = 1;
-	      } else if (b <= 0xEF) {
+	        needed = 1;
+	      } else if (b >= 0xE0 && b <= 0xEF) {
+	        if (b === 0xE0) {
+	          lower = 0xA0;
+	        } else if (b === 0xED) {
+	          upper = 0x9F;
+	        }
 	        c = b & 0x0F;
-	        followingChars = 2;
-	      } else if (b <= 0xF7) {
+	        needed = 2;
+	      } else if (b >= 0xF0 && b <= 0xF4) {
+	        if (b === 0xF0) {
+	          lower = 0x90;
+	        } else if (b === 0xF4) {
+	          upper = 0x8F;
+	        }
 	        c = b & 0x07;
-	        followingChars = 3;
+	        needed = 3;
 	      } else {
-	        throwInvalidUtf8(i, str);
+	        // invalid lead byte: U+FFFD
+	        str += '\ufffd';
+	        continue;
 	      }
 
-	      for (var j = 0; j < followingChars; ++j) {
-	        b = bytes[i++];
-	        if (b < 0x80 || b > 0xBF) {
-	          throwInvalidUtf8(i, str);
+	      while (needed && i < length) {
+	        b = bytes[i];
+	        if (b < lower || b > upper) {
+	          break;
 	        }
-	        c <<= 6;
-	        c += b & 0x3F;
+	        lower = 0x80;
+	        upper = 0xBF;
+	        c = (c << 6) | (b & 0x3F);
+	        ++i;
+	        --needed;
 	      }
-	      if (c >= 0xD800 && c <= 0xDFFF) {
-	        throwInvalidUtf8(i, str);
-	      }
-	      if (c > 0x10FFFF) {
-	        throwInvalidUtf8(i, str);
+	      if (needed) {
+	        // truncated or ill-formed sequence: U+FFFD (same as TextDecoder)
+	        str += '\ufffd';
+	        continue;
 	      }
 
 	      if (c <= 0xFFFF) {
@@ -226,7 +239,7 @@ var base32$1 = {exports: {}};
 	  };
 
 	  var encodeUtf8 = function (str) {
-	    var v1, v2, v3, v4, v5, code, end = false, base32Str = '',
+	    var v1, v2, v3, v4, v5, code, code2, end = false, base32Str = '',
 	      index = 0, i, start = 0, length = str.length;
 	      if (str === '') {
 	        return base32Str;
@@ -246,12 +259,18 @@ var base32$1 = {exports: {}};
 	          blocks[i++] = 0xe0 | (code >> 12);
 	          blocks[i++] = 0x80 | ((code >> 6) & 0x3f);
 	          blocks[i++] = 0x80 | (code & 0x3f);
-	        } else {
-	          code = 0x10000 + (((code & 0x3ff) << 10) | (str.charCodeAt(++index) & 0x3ff));
+	        } else if (code < 0xdc00 && (code2 = str.charCodeAt(index + 1)) >= 0xdc00 && code2 < 0xe000) {
+	          ++index;
+	          code = 0x10000 + (((code & 0x3ff) << 10) | (code2 & 0x3ff));
 	          blocks[i++] = 0xf0 | (code >> 18);
 	          blocks[i++] = 0x80 | ((code >> 12) & 0x3f);
 	          blocks[i++] = 0x80 | ((code >> 6) & 0x3f);
 	          blocks[i++] = 0x80 | (code & 0x3f);
+	        } else {
+	          // unpaired surrogate: U+FFFD
+	          blocks[i++] = 0xef;
+	          blocks[i++] = 0xbf;
+	          blocks[i++] = 0xbd;
 	        }
 	      }
 	      start = i - 5;
@@ -374,7 +393,7 @@ var base32$1 = {exports: {}};
 
 	  var encode = function (input, asciiOnly) {
 	    var notString = typeof(input) !== 'string';
-	    if (notString && input.constructor === ArrayBuffer) {
+	    if (notString && typeof ArrayBuffer !== 'undefined' && input.constructor === ArrayBuffer) {
 	      input = new Uint8Array(input);
 	    }
 	    if (notString) {

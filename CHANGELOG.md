@@ -1,5 +1,18 @@
 # Change Log
 
+## v0.7.0 / 2026-11-17
+### Added
+- Web Worker support. `base32` is exposed on `self` when loaded with `importScripts`.
+
+### Fixed
+- Unpaired UTF-16 surrogates in string input were encoded incorrectly and consumed the following code unit. They are now encoded as U+FFFD, matching `TextEncoder`.
+- Truncated, overlong, and other ill-formed UTF-8 sequences could be decoded into wrong characters instead of being rejected.
+- Browsers with a `process` polyfill (e.g. BrowserFS) and Electron renderers were detected as Node.js and threw `global is not defined`.
+- Encoding non-string input threw `ReferenceError` in environments without `ArrayBuffer`.
+
+### Changed
+- Decoding invalid UTF-8 now replaces ill-formed sequences with U+FFFD, matching `TextDecoder`, instead of throwing an error. Use `base32.decode.asBytes()` to get the raw bytes.
+
 ## v0.6.0 / 2026-10-26
 ### Added
 - `casefold` option to accept lowercase input when decoding. #20

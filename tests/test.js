@@ -49,6 +49,72 @@
     '4S4K3ZUWQ7SLRLPGS2D6JOFN42LIPZFYVXTJNB7EXCW6NFUH4S4K3ZUWQ72JBAEA'
   ];
 
+  var unpairedSurrogateStrs = [
+    '\ud800',
+    'a\ud83db',
+    '\ud83d\ud83d\ude00\udfff',
+    'abcd\udc00',
+    'abc\ud83d'
+  ];
+
+  var base32UnpairedSurrogateStrs = [
+    '56732===',
+    'MHX37PLC',
+    '567334E7TCAO7P55',
+    'MFRGGZHPX66Q====',
+    'MFRGH357XU======'
+  ];
+
+  var base32Utf8EdgeStrs = [
+    '4S4A====',
+    'MHBQ====',
+    '6CPZQ===',
+    'YCAA====',
+    'YCXQ====',
+    '4CAIA===',
+    '6CAIBAA=',
+    '5WQIA===',
+    '6SIIBAA=',
+    'QA======',
+    '74======',
+    '7CEIBAEA',
+    '4S4GC===',
+    '6CPZRAHEXA======',
+    '4CQIA===',
+    '5WP36===',
+    '6GAIBAA=',
+    '6SH37PY='
+  ];
+
+  var utf8EdgeDecodedStrs = [
+    '\ufffd',
+    'a\ufffd',
+    '\ufffd',
+    '\ufffd\ufffd',
+    '\ufffd\ufffd',
+    '\ufffd\ufffd\ufffd',
+    '\ufffd\ufffd\ufffd\ufffd',
+    '\ufffd\ufffd\ufffd',
+    '\ufffd\ufffd\ufffd\ufffd',
+    '\ufffd',
+    '\ufffd',
+    '\ufffd\ufffd\ufffd\ufffd\ufffd',
+    '\ufffda',
+    '\ud83d\ude00\ufffd',
+    '\u0800',
+    '\ud7ff',
+    '\ud8c0\udc00',
+    '\udbff\udfff'
+  ];
+
+  var base32NonUtf8DecodedStrs = [
+    '\ufffd',
+    '\ufffdy',
+    '\ufffd\ufffd\ufffd',
+    '\ufffd\ufffd\ufffd\ufffd',
+    '中文中文中文中文中文中文\ufffd\ufffd\ufffd\ufffd'
+  ];
+
   var base32Invalid8Strs = [
     '1 ======'
   ];
@@ -67,6 +133,14 @@
         it('should be successful', function() {
           for(var i = 0;i < utf8Str.length;++i) {
             expect(base32.encode(utf8Str[i])).to.be(base32Utf8Strs[i]);
+          }
+        });
+      });
+
+      describe('UTF8 unpaired surrogates', function() {
+        it('should encode as U+FFFD', function() {
+          for(var i = 0;i < unpairedSurrogateStrs.length;++i) {
+            expect(base32.encode(unpairedSurrogateStrs[i])).to.be(base32UnpairedSurrogateStrs[i]);
           }
         });
       });
@@ -152,19 +226,21 @@
         });
       });
 
-      if (typeof HI_BASE32_NO_NODE_JS !== 'undefined') {
-        context('when non-UTF8 as UTF8', function () {
-          for (var i = 0; i < base32NonUtf8Strs.length; ++i) {
-            (function (i) {
-              it('should throw exception', function () {
-                expect(function () {
-                  base32.decode(base32NonUtf8Strs[i]);
-                }).to.throwError();
-              });
-            })(i);
+      describe('ill-formed UTF8', function() {
+        it('should decode non-UTF8 data with U+FFFD', function() {
+          for(var i = 0;i < base32NonUtf8Strs.length;++i) {
+            expect(base32.decode(base32NonUtf8Strs[i])).to.be(base32NonUtf8DecodedStrs[i]);
           }
         });
 
+        it('should decode edge cases like TextDecoder', function() {
+          for(var i = 0;i < base32Utf8EdgeStrs.length;++i) {
+            expect(base32.decode(base32Utf8EdgeStrs[i])).to.be(utf8EdgeDecodedStrs[i]);
+          }
+        });
+      });
+
+      if (typeof HI_BASE32_NO_NODE_JS !== 'undefined') {
         context('when invalid string', function () {
           for (var i = 0; i < base32Invalid8Strs.length; ++i) {
             (function (i) {
